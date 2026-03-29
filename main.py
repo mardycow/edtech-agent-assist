@@ -3,54 +3,32 @@ from dotenv import load_dotenv
 from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel, Field
 from openai import OpenAI
+from agent_workflow import run_agent
 
-app = FastAPI(title="API Prototype")
+load_dotenv() 
 
-load_dotenv()
-
-client = OpenAI(
-    base_url=os.getenv("LLM_HOST_URL"),
-    api_key=os.getenv("LLM_API_KEY")
-)
+app = FastAPI(title="EdTech Agent Assist")
 
 class AIResponse(BaseModel):
-    category: str = Field(description="Категория запроса")
-    draft_answer: str = Field(description="Черновик ответа оператора")
-    confidence: float = Field(description="Уверенность LLM в ответе (0.0 - 1.0)")
-
-SYSTEM_PROMPT = """
-Ты — AI-ассистент службы поддержки EdTech платформы. 
-Твоя цель: создать черновик ответа на основе вопроса студента.
-
-ПРАВИЛА:
-1. Категорию (category) выбирай строго из списка: [Оплата, Техподдержка, Обучение, Прочее].
-2. Оценивай уверенность (confidence) числом в диапазоне 0.0 - 1.0: 1.0 если ответ точный, ниже 0.5 если вопрос размытый.
-3. Отвечай СТРОГО по этому шаблону в JSON:
-{
-  "category": "",
-  "draft_answer": "Текст ответа",
-  "confidence": 
-}
-"""
+    category: str
+    draft_answer: str
+    confidence: float
 
 @app.post("/generate", response_model=AIResponse)
-async def generate_assist(user_query: str, temperature: float = 0.1):
+async def generate_assist(user_query: str):
     try:
-        response = client.chat.completions.create(
-            model="qwen3.5:0.8b",
-            messages=[
-                {"role": "system", "content": SYSTEM_PROMPT},
-                {"role": "user", "content": user_query}
-            ],
-            temperature=temperature,
-            response_format={"type": "json_object"}
-        )
 
-        content = response.choices[0].message.content
-        return AIResponse.model_validate_json(content)
+        response = await run_agent(user_query)
+        
+        if not response:
+            raise HTTPException(status_code=500, detail="API вернул пустой ответ")
+        
+        return AIResponse(**response)
 
     except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Ошибка LLM: {str(e)}")
+        print(f"Error details: {e}")
+        raise HTTPException(status_code=500, detail="Произошла ошибка при обработке запроса")
+
 
 if __name__ == "__main__":
     import uvicorn
