@@ -6,7 +6,8 @@ from langchain_core.prompts import ChatPromptTemplate
 from langchain_core.output_parsers import StrOutputParser
 from langchain_core.runnables import RunnableLambda, RunnablePassthrough
 from config import CANNED_RESPONSES
-from prompts import ROUTER_PROMPT_V1, GEN_PROMPT_V1
+from prompts import ROUTER_PROMPT_V2, GEN_PROMPT_V2
+from config import categories
 
 load_dotenv()
 
@@ -23,12 +24,12 @@ llm = ChatOpenAI(
 )
 
 classifier = (
-    ChatPromptTemplate.from_template(ROUTER_PROMPT_V1) 
+    ChatPromptTemplate.from_template(ROUTER_PROMPT_V2).partial(categories_list=categories)
     | llm.with_structured_output(RouterOutput)
 )
 
 generator = (
-    ChatPromptTemplate.from_template(GEN_PROMPT_V1) 
+    ChatPromptTemplate.from_template(GEN_PROMPT_V2) 
     | llm 
     | StrOutputParser()
 )

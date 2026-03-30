@@ -63,7 +63,7 @@ def tracer(mode='langsmith', save_local=False):
         evaluate(
             lambda x : wrapper(x, save_local),
             data=DATASET_NAME,
-            experiment_prefix="prompts_v1"
+            experiment_prefix="prompts_v2.3"
         )
 
 if __name__ == "__main__":
