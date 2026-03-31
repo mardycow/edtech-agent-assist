@@ -1,19 +1,13 @@
 import os
 from dotenv import load_dotenv
-from pydantic import BaseModel, Field
 from langchain_openai import ChatOpenAI
 from langchain_core.prompts import ChatPromptTemplate
 from langchain_core.output_parsers import StrOutputParser
 from langchain_core.runnables import RunnableLambda, RunnablePassthrough
-from config import CANNED_RESPONSES
-from prompts import ROUTER_PROMPT_V2, GEN_PROMPT_V2
-from config import categories
+from prompts import ROUTER_PROMPT_V3, GEN_PROMPT_V2
+from schemes import RouterOutput
 
 load_dotenv()
-
-class RouterOutput(BaseModel):
-    category: str = Field(description="Категория запроса пользователя")
-    confidence: float = Field(description="Уверенность в выборе категории от 0.0 до 1.0")
 
 llm = ChatOpenAI(
     #model="qwen-3-235b-a22b-instruct-2507",
@@ -24,7 +18,7 @@ llm = ChatOpenAI(
 )
 
 classifier = (
-    ChatPromptTemplate.from_template(ROUTER_PROMPT_V2).partial(categories_list=categories)
+    ChatPromptTemplate.from_template(ROUTER_PROMPT_V3)
     | llm.with_structured_output(RouterOutput)
 )
 
@@ -38,9 +32,10 @@ def routing(input_data):
     classification = input_data["classification"]
     user_query = input_data["user_query"]
     category = classification.category
+    action = classification.to_act
     
-    if category in CANNED_RESPONSES:
-        answer = CANNED_RESPONSES[category]
+    if action in ["canned_responses", "clarify"]:
+        answer = "понятно"
     else:
         answer = generator.invoke({
             "user_query": user_query,
