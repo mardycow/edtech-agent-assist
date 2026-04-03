@@ -1,9 +1,9 @@
 import os
 from dotenv import load_dotenv
 from fastapi import FastAPI, HTTPException
-from pydantic import BaseModel, Field
+from pydantic import BaseModel
 from openai import OpenAI
-from agent_workflow import run_agent
+from agent_workflow import run
 
 load_dotenv() 
 
@@ -18,7 +18,7 @@ class AIResponse(BaseModel):
 async def generate_assist(user_query: str):
     try:
 
-        response = await run_agent(user_query)
+        response = await run(user_query)
         
         if not response:
             raise HTTPException(status_code=500, detail="API вернул пустой ответ")

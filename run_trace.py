@@ -26,10 +26,10 @@ def get_ai_response(inputs):
     
     try:
         response = requests.post(API_URL, params={"user_query" : query})
-
         if response.status_code == 200:
             return response.json()
         else:
+            print(response.status_code, response.text)
             return {
                 "category" : "Error", 
                 "draft_answer" : "API Error", 
@@ -44,7 +44,7 @@ def get_ai_response(inputs):
     
 def csv_reader(filepath):
     with open(filepath, mode='r', encoding='utf-8-sig') as file:
-        yield from csv.DictReader(file, delimeter=';')
+        yield from csv.DictReader(file, delimiter=';')
 
 def wrapper(inputs, save_local):
     response = get_ai_response(inputs)
