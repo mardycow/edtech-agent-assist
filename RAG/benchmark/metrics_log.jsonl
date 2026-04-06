@@ -1,0 +1,1 @@
+{"run": "RAG/benchmark/runs/v1_baseline.jsonl", "results": {"precision@1": 0.7294117647058823, "precision@3": 0.34117647058823525, "mrr": 0.8235294117647058, "hit_rate@3": 0.9294117647058824}}
