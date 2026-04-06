@@ -50,7 +50,7 @@ def wrapper(inputs, save_local):
     response = get_ai_response(inputs)
 
     if save_local:
-        with open(OUTPUT_PATH, mode='a', encoding='utf-8-sig') as file:
+        with open(OUTPUT_PATH, mode='a', encoding='utf-8') as file:
             file.write(json.dumps({"input" : inputs, "output" : response}, ensure_ascii=False) + "\n")
 
     return response

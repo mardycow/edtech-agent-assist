@@ -7,14 +7,12 @@ from langchain_core.output_parsers import StrOutputParser
 from langgraph.graph import StateGraph, END
 from prompts import ROUTER_PROMPT_V3, GEN_PROMPT_V3
 from schemes import RouterOutput
-from vectorize import load_and_index_data
+from RAG.vectorize import load_and_index_data
 
 load_dotenv()
 vectorstore = load_and_index_data()
 
 llm = ChatOpenAI(
-    #model="qwen-3-235b-a22b-instruct-2507",
-    #model="gpt-oss-120b",
     model="qwen/qwen3-235b-a22b-2507:nitro",
     temperature=0.1,
     base_url=os.getenv("BASE_URL"),
@@ -50,7 +48,6 @@ def classifier_node(state : AgentState) -> AgentState:
     return state
 
 def retriever_node(state: AgentState) -> AgentState:
-    category = state["category"]
     query = state["user_query"]
 
     docs = vectorstore.similarity_search(
