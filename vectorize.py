@@ -56,6 +56,10 @@ class VectorDBManager:
         for i, chunk in enumerate(chunks):
             custom_id = f"{file_name}_chunk{i}"
 
+            header_content = "\n".join(chunk.metadata.values()) if chunk.metadata else file_name
+
+            full_content = f"{header_content}\n{chunk.page_content}"
+
             combined_meta = {
                 **file_meta, 
                 **chunk.metadata,
@@ -64,19 +68,28 @@ class VectorDBManager:
             }
 
             doc = Document(
-                page_content=chunk.page_content,
+                page_content=full_content,
                 metadata=self._prepare_metadata(combined_meta),
                 id=custom_id
             )
 
             documents.append(doc)
-            corpus_payload.append((custom_id, chunk.page_content))
+            corpus_payload.append((custom_id, full_content))
         
         db.add_documents(documents)
 
         if update_corpus:
             self._update_corpus_batch(corpus_payload)
 
-        print(f"✅ Добавлен файл '{file_name}': {len(documents)} чанков")
+        print(f"Добавлен файл '{file_name}': {len(documents)} чанков")
+
+if __name__ == "__main__":
+    db = VectorDBManager()
+    db.add_file("data/documents/contacts.md")
+    db.add_file("data/documents/courses.md")
+    db.add_file("data/documents/faq_finance.md")
+    db.add_file("data/documents/faq_support.md")
+    db.add_file("data/documents/instructions.md")
+    db.add_file("data/documents/pricing.md")
 
 

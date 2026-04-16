@@ -3,7 +3,7 @@ from dotenv import load_dotenv
 import requests
 import csv
 import json
-from langsmith import Client, evaluate
+from langsmith import evaluate
 
 load_dotenv()
 
@@ -12,10 +12,10 @@ API_URL=os.getenv("API_URL")
 INPUT_PATH="data/test_data.csv"
 OUTPUT_PATH="data/traces_v1.jsonl"
 
-DATASET_NAME = "Dataset"
+DATASET_NAME = "queries"
 
 def get_ai_response(inputs):
-    query = inputs["user_query"]
+    query = inputs["text"]
 
     if not query:
         return {
@@ -63,7 +63,7 @@ def tracer(mode='langsmith', save_local=False):
         evaluate(
             lambda x : wrapper(x, save_local),
             data=DATASET_NAME,
-            experiment_prefix="prompts_v2.3"
+            experiment_prefix="prompts_v3"
         )
 
 if __name__ == "__main__":
